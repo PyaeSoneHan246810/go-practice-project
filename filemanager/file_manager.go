@@ -7,8 +7,20 @@ import (
 	"os"
 )
 
-func CreateFile(fileName string) (*os.File, error) {
-	file, err := os.Create(fileName)
+type FileManager struct {
+	InputFilePath  string
+	OutputFilePath string
+}
+
+func New(inputPath, outputPath string) *FileManager {
+	return &FileManager{
+		InputFilePath:  inputPath,
+		OutputFilePath: outputPath,
+	}
+}
+
+func (fileManager FileManager) CreateFile() (*os.File, error) {
+	file, err := os.Create(fileManager.OutputFilePath)
 	if err != nil {
 		err = errors.New("failed to create file")
 		return nil, err
@@ -16,8 +28,8 @@ func CreateFile(fileName string) (*os.File, error) {
 	return file, nil
 }
 
-func OpenFile(fileName string) (*os.File, error) {
-	file, err := os.Open(fileName)
+func (fileManager FileManager) OpenFile() (*os.File, error) {
+	file, err := os.Open(fileManager.InputFilePath)
 	if err != nil {
 		err = errors.New("failed to open file")
 		return nil, err
@@ -25,7 +37,7 @@ func OpenFile(fileName string) (*os.File, error) {
 	return file, nil
 }
 
-func ReadLines(file *os.File) ([]string, error) {
+func (fileManager FileManager) ReadLines(file *os.File) ([]string, error) {
 	scanner := bufio.NewScanner(file)
 	var lines []string
 	for scanner.Scan() {
@@ -39,7 +51,7 @@ func ReadLines(file *os.File) ([]string, error) {
 	return lines, nil
 }
 
-func WriteJson(file *os.File, data any) error {
+func (fileManager FileManager) WriteJson(file *os.File, data any) error {
 	encoder := json.NewEncoder(file)
 	err := encoder.Encode(data)
 	if err != nil {

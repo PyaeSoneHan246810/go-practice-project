@@ -48,4 +48,16 @@ func (job *TaxIncludedPriceJob) Process() {
 		result[fmt.Sprintf("%.2f", price)] = fmt.Sprintf("%.2f", taxIncludedPrice)
 	}
 	job.TaxIncludedPrices = result
+
+	file, err := filemanager.CreateFile(fmt.Sprintf("result %.0f.json", job.TaxRate*100))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = filemanager.WriteJson(file, job)
+	if err != nil {
+		fmt.Println(err)
+		file.Close()
+		return
+	}
 }

@@ -1,11 +1,10 @@
 package prices
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 
 	"github.com/PyaeSoneHan246810/go-practice-project/conversion"
+	"github.com/PyaeSoneHan246810/go-practice-project/filemanager"
 )
 
 type TaxIncludedPriceJob struct {
@@ -21,20 +20,13 @@ func NewTaxIncludedPriceJob(taxRate float64) *TaxIncludedPriceJob {
 }
 
 func (job *TaxIncludedPriceJob) LoadData() {
-	file, err := os.Open("prices.txt")
+	file, err := filemanager.OpenFile("prices.txt")
 	if err != nil {
-		fmt.Println("Failed to open the file!")
 		fmt.Println(err)
 		return
 	}
-	scanner := bufio.NewScanner(file)
-	var lines []string
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	err = scanner.Err()
+	lines, err := filemanager.ReadLines(file)
 	if err != nil {
-		fmt.Println("Failed to read the file content!")
 		fmt.Println(err)
 		file.Close()
 		return

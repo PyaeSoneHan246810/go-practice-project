@@ -4,17 +4,17 @@ import (
 	"fmt"
 
 	"github.com/PyaeSoneHan246810/go-practice-project/conversion"
-	"github.com/PyaeSoneHan246810/go-practice-project/filemanager"
+	"github.com/PyaeSoneHan246810/go-practice-project/iomanager"
 )
 
 type TaxIncludedPriceJob struct {
-	IOManager         *filemanager.FileManager
-	TaxRate           float64
-	InputPrices       []float64
-	TaxIncludedPrices map[string]string
+	IOManager         iomanager.IOManager `json:"-"`
+	TaxRate           float64             `json:"tax_rate"`
+	InputPrices       []float64           `json:"input_prices"`
+	TaxIncludedPrices map[string]string   `json:"tax_included_prices"`
 }
 
-func NewTaxIncludedPriceJob(ioManager *filemanager.FileManager, taxRate float64) *TaxIncludedPriceJob {
+func NewTaxIncludedPriceJob(ioManager iomanager.IOManager, taxRate float64) *TaxIncludedPriceJob {
 	return &TaxIncludedPriceJob{
 		IOManager: ioManager,
 		TaxRate:   taxRate,
@@ -22,21 +22,14 @@ func NewTaxIncludedPriceJob(ioManager *filemanager.FileManager, taxRate float64)
 }
 
 func (job *TaxIncludedPriceJob) LoadData() {
-	file, err := job.IOManager.OpenFile()
+	lines, err := job.IOManager.ReadLines()
 	if err != nil {
 		fmt.Println(err)
-		return
-	}
-	lines, err := job.IOManager.ReadLines(file)
-	if err != nil {
-		fmt.Println(err)
-		file.Close()
 		return
 	}
 	prices, err := conversion.StringsToFloats(lines)
 	if err != nil {
 		fmt.Println(err)
-		file.Close()
 		return
 	}
 	job.InputPrices = prices
@@ -51,15 +44,9 @@ func (job *TaxIncludedPriceJob) Process() {
 	}
 	job.TaxIncludedPrices = result
 
-	file, err := job.IOManager.CreateFile()
+	err := job.IOManager.WriteData(job)
 	if err != nil {
 		fmt.Println(err)
-		return
-	}
-	err = job.IOManager.WriteJson(file, job)
-	if err != nil {
-		fmt.Println(err)
-		file.Close()
 		return
 	}
 }

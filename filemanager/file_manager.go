@@ -37,24 +37,35 @@ func (fileManager FileManager) OpenFile() (*os.File, error) {
 	return file, nil
 }
 
-func (fileManager FileManager) ReadLines(file *os.File) ([]string, error) {
+func (fileManager FileManager) ReadLines() ([]string, error) {
+	file, err := fileManager.OpenFile()
+	if err != nil {
+		return nil, err
+	}
 	scanner := bufio.NewScanner(file)
 	var lines []string
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
-	err := scanner.Err()
+	err = scanner.Err()
 	if err != nil {
+		file.Close()
 		err = errors.New("failed to read file")
 		return nil, err
 	}
+	file.Close()
 	return lines, nil
 }
 
-func (fileManager FileManager) WriteJson(file *os.File, data any) error {
-	encoder := json.NewEncoder(file)
-	err := encoder.Encode(data)
+func (fileManager FileManager) WriteData(data any) error {
+	file, err := fileManager.CreateFile()
 	if err != nil {
+		return err
+	}
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(data)
+	if err != nil {
+		file.Close()
 		err = errors.New("failed to encode data")
 		return err
 	}
